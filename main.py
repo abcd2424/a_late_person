@@ -30,4 +30,3 @@ chart = (
 
 # 6) Streamlit에 차트 표시
 st.altair_chart(chart, use_container_width=True)
-streamlit run app.py
