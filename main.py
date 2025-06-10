@@ -1,31 +1,46 @@
+# streamlit_app.py
 import streamlit as st
 import pandas as pd
 import altair as alt
 
 st.title("지각비 내림차순 가로 막대그래프")
 
-# 1) Excel 파일 로드
-#    - header=0 으로 첫 행(D1)을 컬럼명으로 사용
-df = pd.read_excel("지각비.xltx", header=0, engine="openpyxl")
+# 1) CSV 불러오기 (한글 파일이라면 encoding='utf-8-sig' 권장)
+df = pd.read_csv("지각비.csv", encoding="utf-8-sig")
 
-# 2) D열 이름 추출 (0-based 인덱스 3이 D열)
-d_col = df.columns[3]
+# 2) D열 선택 (0-based: 3번 컬럼), 헤더는 첫 번째 행(df.columns)에 이미 빠져 있으므로 바로 사용
+#    필요하다면 df.columns 로 컬럼 이름을 확인하세요.
+d_series = df.iloc[:, 3]
 
 # 3) 내림차순 정렬
-df_sorted = df.sort_values(by=d_col, ascending=False).reset_index(drop=True)
+d_sorted = d_series.sort_values(ascending=False)
 
-# 4) 레이블로 사용할 컬럼 지정 (여기서는 첫 번째 컬럼이라고 가정)
-label_col = df_sorted.columns[0]
+# 4) 시각화용 DataFrame 생성 (index가 라벨 역할)
+plot_df = pd.DataFrame({
+    "label": d_sorted.index.astype(str),   # 행 번호 대신 다른 라벨(예: 이름)이 있으면 여기에 넣으세요.
+    "value": d_sorted.values
+})
 
 # 5) Altair로 가로 막대그래프 생성
 chart = (
-    alt.Chart(df_sorted)
-    .mark_bar()
-    .encode(
-        x=alt.X(f"{d_col}:Q", title=d_col),
-        y=alt.Y(f"{label_col}:N", sort='-x', title=label_col)  # '-x'로 높은 값이 위로
-    )
-    .properties(width=700, height=400)
+    alt.Chart(plot_df)
+       .mark_bar()
+       .encode(
+           x=alt.X("value:Q", title="지각비"),
+           y=alt.Y(
+               "label:O",
+               sort=alt.EncodingSortField(
+                   field="value",      # value 기준으로
+                   op="identity",      # 그 자체 크기(identity)
+                   order="descending"  # 내림차순 → 큰 값이 위로
+               ),
+               title="행 번호"
+           )
+       )
+       .properties(
+           width=700,
+           height=400
+       )
 )
 
 # 6) Streamlit에 차트 표시
