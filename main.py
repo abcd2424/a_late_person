@@ -1,3 +1,12 @@
+
+# streamlit_app.py
+import streamlit as st
+import pandas as pd
+import altair as alt
+
+
+st.title("지각비 내림차순 가로 막대그래프")
+
 # main/main.py
 
 import os
@@ -13,14 +22,6 @@ csv_path = os.path.join(script_dir, "지각비.csv")
 df = pd.read_csv(csv_path, encoding="utf-8-sig")
 
 # 이하 생략: D열 정렬, 차트 그리기 등…
-
-# streamlit_app.py
-import streamlit as st
-import pandas as pd
-import altair as alt
-
-st.title("지각비 내림차순 가로 막대그래프")
-
 # 1) CSV 불러오기 (한글 파일이라면 encoding='utf-8-sig' 권장)
 df = pd.read_csv("지각비.csv", encoding="utf-8-sig")
 
