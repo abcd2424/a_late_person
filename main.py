@@ -1,4 +1,20 @@
+import os
+import streamlit as st
 
+# 이 파일이 실제로 어디에 있는지
+st.write("💡 __file__:", os.path.abspath(__file__))
+
+# 스크립트 폴더(이론상 지각비.csv가 있는 곳)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+st.write("💡 script_dir:", script_dir)
+
+# 그 폴더에 정말 csv가 있는지
+csv_path = os.path.join(script_dir, "지각비.csv")
+st.write("💡 csv_path:", csv_path)
+st.write("💡 exists:", os.path.exists(csv_path))
+
+# 스크립트 폴더 안 파일 목록도 출력
+st.write("💡 dir listing:", os.listdir(script_dir))
 # streamlit_app.py
 import streamlit as st
 import pandas as pd
