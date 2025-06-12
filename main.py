@@ -1,3 +1,19 @@
+# main/main.py
+
+import os
+import pandas as pd
+import streamlit as st
+import altair as alt
+
+# → 이 부분이 핵심: 스크립트 파일 위치를 기준으로 CSV 경로 생성
+script_dir = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(script_dir, "지각비.csv")
+
+# 이제 이 경로로 읽어 옵니다
+df = pd.read_csv(csv_path, encoding="utf-8-sig")
+
+# 이하 생략: D열 정렬, 차트 그리기 등…
+
 # streamlit_app.py
 import streamlit as st
 import pandas as pd
