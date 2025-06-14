@@ -40,8 +40,26 @@ plot_df = pd.DataFrame({
 chart = (
     alt.Chart(plot_df)
        .mark_bar()
+      chart = (
+    alt.Chart(plot_df)
+       .mark_bar()
        .encode(
-           x=alt.X("value:Q", title="지각비"),
+           x=alt.X(
+               "value:Q",
+               title="지각비",
+               axis=alt.Axis(
+                   format='d',        # 정수 포맷
+                   tickMinStep=1      # 눈금 최소 간격 1
+               )
+           ),
+           y=alt.Y(
+               "label:O",
+               sort=alt.EncodingSortField("value", order="descending"),
+               title="행 번호"
+           )
+       )
+       .properties(width=700, height=400)
+)
            y=alt.Y(
                "label:O",
                sort=alt.EncodingSortField(
