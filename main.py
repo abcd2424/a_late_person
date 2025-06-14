@@ -5,10 +5,8 @@ import altair as alt
 
 # 디버깅: 실제 파일 위치와 존재 여부 확인
 st.write("💡 __file__:", os.path.abspath(__file__))
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 st.write("💡 script_dir:", script_dir)
-
 csv_path = os.path.join(script_dir, "data.csv")
 st.write("💡 csv_path:", csv_path)
 st.write("💡 exists:", os.path.exists(csv_path))
@@ -17,7 +15,7 @@ st.write("💡 dir listing:", os.listdir(script_dir))
 # 앱 제목
 st.title("지각비 내림차순 가로 막대그래프")
 
-# CSV 읽기: data.csv로 변경
+# CSV 읽기
 if os.path.exists(csv_path):
     df = pd.read_csv(csv_path, encoding="utf-8-sig")
 else:
@@ -40,32 +38,18 @@ plot_df = pd.DataFrame({
 chart = (
     alt.Chart(plot_df)
        .mark_bar()
-      chart = (
-    alt.Chart(plot_df)
-       .mark_bar()
        .encode(
            x=alt.X(
                "value:Q",
                title="지각비",
                axis=alt.Axis(
-                   format='d',        # 정수 포맷
-                   tickMinStep=1      # 눈금 최소 간격 1
+                   format='d',        # 정수 포맷 (소수점 제거)
+                   tickMinStep=1      # 눈금 최소 간격을 1로 설정
                )
            ),
            y=alt.Y(
                "label:O",
-               sort=alt.EncodingSortField("value", order="descending"),
-               title="행 번호"
-           )
-       )
-       .properties(width=700, height=400)
-)
-           y=alt.Y(
-               "label:O",
-               sort=alt.EncodingSortField(
-                   field="value",
-                   order="descending"
-               ),
+               sort=alt.EncodingSortField(field="value", order="descending"),
                title="행 번호"
            )
        )
