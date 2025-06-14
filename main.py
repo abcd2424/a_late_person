@@ -41,7 +41,7 @@ chart = (
        .encode(
            x=alt.X(
                "value:Q",
-               title="지각비",
+               title="지각 횟수",         # 변경된 x축 제목
                axis=alt.Axis(
                    format='d',        # 정수 포맷 (소수점 제거)
                    tickMinStep=1      # 눈금 최소 간격을 1로 설정
@@ -50,7 +50,7 @@ chart = (
            y=alt.Y(
                "label:O",
                sort=alt.EncodingSortField(field="value", order="descending"),
-               title="행 번호"
+               title="출석번호"           # 변경된 y축 제목
            )
        )
        .properties(width=700, height=400)
