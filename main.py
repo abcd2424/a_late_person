@@ -59,9 +59,11 @@ chart = (
 
 st.altair_chart(chart, use_container_width=True)
 
-# H34 셀 값 (H열: 7번째 인덱스 → index=33)
+# H34 셀 접근 및 통화 포맷 처리
 try:
-    total_fee = df.iloc[33, 7]  # H34는 34행, H열이므로 index 33, column 7
-    st.markdown(f"### 지각비 총액: {int(total_fee):,}원")
-except (IndexError, ValueError, TypeError):
-    st.error("H34 셀에서 지각비 총액을 불러올 수 없습니다.")
+    raw_value = df.iat[33, 7]  # H34 셀: 34행, 8번째 열
+    cleaned_value = str(raw_value).replace("₩", "").replace(",", "").strip()
+    total_fee = int(cleaned_value)
+    st.markdown(f"### 지각비 총액: {total_fee:,}원")
+except Exception as e:
+    st.error(f"❌ H34 셀에서 지각비 총액을 불러올 수 없습니다.\n오류: {e}")
