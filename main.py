@@ -4,7 +4,7 @@ import pandas as pd
 import altair as alt
 
 # 앱 제목
-st.title("지각비 내림차순 가로 막대그래프")
+st.title("지각비")
 
 # CSV 읽기
 csv_path = os.path.join(os.path.dirname(__file__), "data.csv")
