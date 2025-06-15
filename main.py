@@ -47,14 +47,21 @@ chart = (
            y=alt.Y(
                "출석번호:O",
                title="출석번호",
-               scale=alt.Scale(domain=domain_list),      # 모든 카테고리 강제 표시
-               axis=alt.Axis(labelOverlap=False)         # 라벨 간섭 방지
+               scale=alt.Scale(domain=domain_list),
+               axis=alt.Axis(labelOverlap=False)
            )
        )
        .properties(
            width=700,
-           height=len(domain_list) * 25               # 행 수만큼 세로 크기 확보
+           height=len(domain_list) * 25
        )
 )
 
 st.altair_chart(chart, use_container_width=True)
+
+# H34 셀 값 (H열: 7번째 인덱스 → index=33)
+try:
+    total_fee = df.iloc[33, 7]  # H34는 34행, H열이므로 index 33, column 7
+    st.markdown(f"### 지각비 총액: {int(total_fee):,}원")
+except (IndexError, ValueError, TypeError):
+    st.error("H34 셀에서 지각비 총액을 불러올 수 없습니다.")
