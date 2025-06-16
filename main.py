@@ -32,7 +32,7 @@ plot_df = pd.DataFrame({
     "지각 횟수": lateness,
     "총액값": df["총액"].apply(clean_currency),
     "미납금값": df["남은금액"].apply(clean_currency)
-}).iloc[:32]
+}).iloc[:32]  # 합계 행 제외
 
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
@@ -66,7 +66,7 @@ melt_df["구분"] = melt_df["구분"].map({
 # 이름 순서 고정
 melt_df["이름"] = pd.Categorical(melt_df["이름"], categories=domain_list, ordered=True)
 
-# Altair 스택 그래프 (색상 순서 반전)
+# Altair 스택 그래프 (색상 순서: 미납 → 납부 완료)
 chart = (
     alt.Chart(melt_df)
     .mark_bar()
@@ -86,20 +86,16 @@ chart = (
 # 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
-# 지각비 총액 출력 (엑셀 H34 = index 32, '남은금액' 열)
+# 지각비 총액 계산 (합계 행 의존 X)
 try:
-    raw_total = df.at[32, "남은금액"]
-    cleaned_total = str(raw_total).replace("₩", "").replace(",", "").strip()
-    total_fee = int(cleaned_total)
+    total_fee = plot_df["총액값"].sum()
     st.markdown(f"### 지각비 총액: {total_fee:,}원")
 except Exception as e:
     st.error(f"❌ 지각비 총액을 불러올 수 없습니다.\n오류: {e}")
 
-# 미납금 총합 출력 (남은금액 열의 마지막 행)
+# 미납금 총액 계산 (합계 행 의존 X)
 try:
-    raw_balance = df["남은금액"].iloc[-1]
-    cleaned_balance = str(raw_balance).replace("₩", "").replace(",", "").strip()
-    total_balance = int(cleaned_balance)
+    total_balance = plot_df["미납금값"].sum()
     st.markdown(f"### 미납금 총액: {total_balance:,}원")
 except Exception as e:
     st.error(f"❌ 미납금 총액을 불러올 수 없습니다.\n오류: {e}")
