@@ -18,18 +18,19 @@ attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 # 지각 횟수 처리 (D열: index 3)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 시각화용 데이터 정리 (이름 포함)
+# 시각화용 데이터 정리 (이름 + 총액 포함)
 plot_df = pd.DataFrame({
     "출석번호": attendance,
     "이름": df["이름"],
-    "지각 횟수": lateness
+    "지각 횟수": lateness,
+    "총액": df["총액"]
 }).iloc[:32]  # 마지막 합계행 제외
 
 # 지각 횟수 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
 domain_list = plot_df["출석번호"].tolist()
 
-# Altair 막대그래프 생성 (툴팁: 마우스 올릴 때만 이름, 출석번호, 지각 횟수 표시)
+# Altair 막대그래프 (툴팁: 이름 + 총액 / 출석번호는 표시하지 않음)
 chart = (
     alt.Chart(plot_df)
        .mark_bar()
@@ -37,7 +38,7 @@ chart = (
            x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
            y=alt.Y("출석번호:O", title="출석번호", scale=alt.Scale(domain=domain_list),
                    axis=alt.Axis(labelOverlap=False)),
-           tooltip=["출석번호", "이름", "지각 횟수"]
+           tooltip=["이름", "총액"]
        )
        .properties(width=700, height=len(domain_list) * 25)
 )
@@ -45,7 +46,7 @@ chart = (
 # 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
-# 지각비 총액 출력 (엑셀 기준 H34 → '남은금액' 열의 33번째 행)
+# 지각비 총액 출력 (엑셀 기준 H34 = '남은금액' 열의 33번째 행)
 try:
     raw_value = df.at[32, "남은금액"]
     cleaned_value = str(raw_value).replace("₩", "").replace(",", "").strip()
