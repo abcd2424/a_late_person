@@ -32,10 +32,13 @@ plot_df = pd.DataFrame({
     "지각 횟수": lateness,
     "총액값": df["총액"].apply(clean_currency),
     "미납금값": df["남은금액"].apply(clean_currency)
-}).iloc[:32]  # 마지막 합계 행 제외
+}).iloc[:32]  # 합계 행 제외
 
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
+
+# 낸 금액 계산
+plot_df["낸금액값"] = plot_df["총액값"] - plot_df["미납금값"]
 
 # 표시용 텍스트 생성
 plot_df["총액"] = plot_df["총액값"].apply(lambda x: f": ₩{x:,}")
@@ -45,20 +48,39 @@ plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f": ₩{x:,}")
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
 domain_list = plot_df["이름"].tolist()
 
-# Altair 그래프 생성
+# 데이터 분할 (스택 그래프용)
+melt_df = pd.melt(
+    plot_df,
+    id_vars=["이름"],
+    value_vars=["낸금액값", "미납금값"],
+    var_name="구분",
+    value_name="금액"
+)
+
+# 보기 좋게 이름 매핑
+melt_df["구분"] = melt_df["구분"].map({
+    "낸금액값": "납부 완료",
+    "미납금값": "미납"
+})
+
+# 이름 순서 고정
+melt_df["이름"] = pd.Categorical(melt_df["이름"], categories=domain_list, ordered=True)
+
+# Altair 스택 그래프
 chart = (
-    alt.Chart(plot_df)
-       .mark_bar()
-       .encode(
-           x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
-           y=alt.Y("이름:O", scale=alt.Scale(domain=domain_list),
-                   axis=alt.Axis(labelOverlap=False, title=None)),
-           tooltip=[
-               alt.Tooltip("총액", title=""),
-               alt.Tooltip("미납금", title="")
-           ]
-       )
-       .properties(width=700, height=len(domain_list) * 25)
+    alt.Chart(melt_df)
+    .mark_bar()
+    .encode(
+        x=alt.X("금액:Q", title="금액 (₩)", axis=alt.Axis(format="d", tickMinStep=1000)),
+        y=alt.Y("이름:O", sort=domain_list, title=None),
+        color=alt.Color("구분:N", scale=alt.Scale(scheme="tableau10")),
+        tooltip=[
+            alt.Tooltip("이름:N"),
+            alt.Tooltip("구분:N"),
+            alt.Tooltip("금액:Q", format=",.0f", title="금액 (₩)")
+        ]
+    )
+    .properties(width=700, height=len(domain_list) * 25)
 )
 
 # 그래프 출력
