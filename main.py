@@ -18,22 +18,33 @@ attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 # 지각 횟수 처리 (D열: index 3)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 시각화용 데이터 정리 (이름 + 총액 포함)
+# 미납금(G열) 정제: ₩ 제거하고 다시 포맷
+def clean_currency(val):
+    try:
+        return int(str(val).replace("₩", "").replace(",", "").strip())
+    except:
+        return 0
+
+# 시각화용 데이터 정리 (이름 + 총액 + 미납금 텍스트 포함)
 plot_df = pd.DataFrame({
     "출석번호": attendance,
     "이름": df["이름"],
     "지각 횟수": lateness,
-    "총액": df["총액"]
+    "총액": df["총액"],
+    "미납금값": df["남은금액"].apply(clean_currency)
 }).iloc[:32]  # 마지막 합계행 제외
 
-# ✅ 지각 횟수가 0 이상인 경우만 포함
+# 지각 횟수 > 0만 포함
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# 지각 횟수 기준 정렬
+# 미납금 텍스트 포맷팅
+plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f"미납금: ₩{x:,}")
+
+# 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
 domain_list = plot_df["출석번호"].tolist()
 
-# Altair 막대그래프 (툴팁: 이름 + 총액 / 출석번호는 표시하지 않음)
+# Altair 그래프
 chart = (
     alt.Chart(plot_df)
        .mark_bar()
@@ -41,7 +52,7 @@ chart = (
            x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
            y=alt.Y("출석번호:O", title="출석번호", scale=alt.Scale(domain=domain_list),
                    axis=alt.Axis(labelOverlap=False)),
-           tooltip=["이름", "총액"]
+           tooltip=["이름", "미납금"]
        )
        .properties(width=700, height=len(domain_list) * 25)
 )
