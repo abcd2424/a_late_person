@@ -25,19 +25,21 @@ def clean_currency(val):
     except:
         return 0
 
-# 시각화용 데이터 정리
+# 시각화용 데이터프레임 생성
 plot_df = pd.DataFrame({
     "출석번호": attendance,
     "이름": df["이름"],
     "지각 횟수": lateness,
-    "총액값": df["총액"].apply(clean_currency)
+    "총액값": df["총액"].apply(clean_currency),
+    "미납금값": df["남은금액"].apply(clean_currency)
 }).iloc[:32]  # 마지막 합계행 제외
 
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# 총액 텍스트 생성 ("총액: ₩xx,xxx")
+# 총액 및 미납금 텍스트 생성
 plot_df["총액표시"] = plot_df["총액값"].apply(lambda x: f"총액: ₩{x:,}")
+plot_df["미납금표시"] = plot_df["미납금값"].apply(lambda x: f"미납금: ₩{x:,}")
 
 # 이름 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
@@ -52,7 +54,8 @@ chart = (
            y=alt.Y("이름:O", scale=alt.Scale(domain=domain_list),
                    axis=alt.Axis(labelOverlap=False, title=None)),
            tooltip=[
-               alt.Tooltip("총액표시", title="")  # "총액:"은 값 안에 포함되어 있으므로 title은 공백 처리
+               alt.Tooltip("총액표시", title=""),
+               alt.Tooltip("미납금표시", title="")
            ]
        )
        .properties(width=700, height=len(domain_list) * 25)
@@ -61,7 +64,7 @@ chart = (
 # 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
-# 지각비 총액 출력 (엑셀 H34 = 33번째 행, '남은금액' 열)
+# 지각비 총액 출력 (엑셀 H34 = '남은금액' 열, 33번째 행)
 try:
     raw_value = df.at[32, "남은금액"]
     cleaned_value = str(raw_value).replace("₩", "").replace(",", "").strip()
