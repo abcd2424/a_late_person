@@ -38,8 +38,8 @@ plot_df = pd.DataFrame({
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
 # 표시용 텍스트 생성
-plot_df["총액"] = plot_df["총액값"].apply(lambda x: f": ₩{x:,}")
-plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f": ₩{x:,}")
+plot_df["총액"] = plot_df["총액값"].apply(lambda x: f":  ₩{x:,}")
+plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f":  ₩{x:,}")
 
 # 이름 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
