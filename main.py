@@ -26,6 +26,9 @@ plot_df = pd.DataFrame({
     "총액": df["총액"]
 }).iloc[:32]  # 마지막 합계행 제외
 
+# ✅ 지각 횟수가 0 이상인 경우만 포함
+plot_df = plot_df[plot_df["지각 횟수"] > 0]
+
 # 지각 횟수 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
 domain_list = plot_df["출석번호"].tolist()
