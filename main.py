@@ -78,6 +78,6 @@ try:
     raw_balance = df["남은금액"].iloc[-1]
     cleaned_balance = str(raw_balance).replace("₩", "").replace(",", "").strip()
     total_balance = int(cleaned_balance)
-    st.markdown(f"### 미납금: ₩{total_balance:,}")
+    st.markdown(f"### 미납금 총액: ₩{total_balance:,}")
 except Exception as e:
     st.error(f"❌ 미납금 총액을 불러올 수 없습니다.\n오류: {e}")
