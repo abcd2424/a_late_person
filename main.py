@@ -54,8 +54,8 @@ chart = (
            y=alt.Y("이름:O", scale=alt.Scale(domain=domain_list),
                    axis=alt.Axis(labelOverlap=False, title=None)),
            tooltip=[
-               alt.Tooltip("총액표시", title=""),
-               alt.Tooltip("미납금표시", title="")
+               alt.Tooltip("총액", title=""),
+               alt.Tooltip("미납금", title="")
            ]
        )
        .properties(width=700, height=len(domain_list) * 25)
