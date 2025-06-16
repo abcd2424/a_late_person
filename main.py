@@ -37,8 +37,44 @@ plot_df = pd.DataFrame({
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# 낸 금액 계산
-plot_df["낸금액값"] = plot_df["총액값"] - plot_df["미납금값"]
+# 낸 금액 계산 (총액값 - 미납금값)
+plot_df["낸 금액"] = plot_df["총액값"] - plot_df["미납금값"]
+
+# Altair 기반 layered chart
+base = alt.Chart(plot_df).encode(
+    y=alt.Y("이름:O", sort='-x', scale=alt.Scale(domain=domain_list),
+            axis=alt.Axis(title=None, labelOverlap=False))
+)
+
+# 빨간색 바: 전체 지각 횟수
+bar_red = base.mark_bar(color="#e74c3c").encode(
+    x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1))
+)
+
+# 파란색 바: 낸 금액 비율만큼 (간접 표현)
+# 예시로 낸 금액 비율을 지각 횟수에 곱해 사용
+plot_df["낸 비율"] = plot_df["총액값"] / (plot_df["총액값"] + plot_df["미납금값"])
+plot_df["낸 비율"] = plot_df["낸 비율"].fillna(0)
+plot_df["낸 횟수"] = (plot_df["지각 횟수"] * plot_df["낸 비율"]).round(1)
+
+bar_blue = base.mark_bar(color="#3498db").encode(
+    x=alt.X("낸 횟수:Q")
+)
+
+# 툴팁 등 추가
+tooltip = base.mark_bar(opacity=0).encode(
+    x="지각 횟수:Q",
+    tooltip=["이름", "지각 횟수", "총액값", "미납금값", "낸 금액"]
+)
+
+# Layered chart 출력
+chart = (bar_red + bar_blue + tooltip).properties(
+    width=700,
+    height=len(domain_list) * 25
+)
+
+st.altair_chart(chart, use_container_width=True)
+
 
 # 표시용 텍스트 생성
 plot_df["총액"] = plot_df["총액값"].apply(lambda x: f": ₩{x:,}")
