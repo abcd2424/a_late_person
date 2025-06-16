@@ -37,12 +37,12 @@ plot_df = pd.DataFrame({
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# "미납금: ₩xxx" 형식 문자열 생성
-plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f": {x:,}")
+# 미납금 텍스트
+plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f"미납금: ₩{x:,}")
 
-# 지각 횟수 기준 정렬
+# 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
-domain_list = plot_df["출석번호"].tolist()
+domain_list = plot_df["이름"].tolist()  # 이름 기준 정렬
 
 # Altair 그래프
 chart = (
@@ -50,11 +50,11 @@ chart = (
        .mark_bar()
        .encode(
            x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
-           y=alt.Y("출석번호:O", title="출석번호", scale=alt.Scale(domain=domain_list),
-                   axis=alt.Axis(labelOverlap=False)),
+           y=alt.Y("이름:O", scale=alt.Scale(domain=domain_list),
+                   axis=alt.Axis(labelOverlap=False, title=None)),  # 👉 y축 라벨 제거
            tooltip=[
                alt.Tooltip("이름"),
-               alt.Tooltip("미납금", title="")  # 라벨 없이 값만 출력
+               alt.Tooltip("미납금", title="")
            ]
        )
        .properties(width=700, height=len(domain_list) * 25)
