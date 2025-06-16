@@ -38,7 +38,7 @@ plot_df = pd.DataFrame({
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
 # "미납금: ₩xxx" 형식 문자열 생성
-plot_df["미납금:"] = plot_df["미납금값"].apply(lambda x: f"{x:,}")
+plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f":{x:,}")
 
 # 지각 횟수 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
