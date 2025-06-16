@@ -18,7 +18,7 @@ attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 # 지각 횟수 처리 (D열)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 미납금(G열) 정제 함수
+# 통화 정제 함수
 def clean_currency(val):
     try:
         return int(str(val).replace("₩", "").replace(",", "").strip())
@@ -30,19 +30,18 @@ plot_df = pd.DataFrame({
     "출석번호": attendance,
     "이름": df["이름"],
     "지각 횟수": lateness,
-    "총액": df["총액"],
-    "미납금값": df["남은금액"].apply(clean_currency)
+    "총액값": df["총액"].apply(clean_currency)
 }).iloc[:32]  # 마지막 합계행 제외
 
 # 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# 미납금 텍스트
-plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f"미납금: ₩{x:,}")
+# 총액 텍스트 생성 ("총액: ₩xx,xxx")
+plot_df["총액표시"] = plot_df["총액값"].apply(lambda x: f"총액: ₩{x:,}")
 
-# 정렬
+# 이름 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
-domain_list = plot_df["이름"].tolist()  # 이름 기준 정렬
+domain_list = plot_df["이름"].tolist()
 
 # Altair 그래프
 chart = (
@@ -51,10 +50,9 @@ chart = (
        .encode(
            x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
            y=alt.Y("이름:O", scale=alt.Scale(domain=domain_list),
-                   axis=alt.Axis(labelOverlap=False, title=None)),  # 👉 y축 라벨 제거
+                   axis=alt.Axis(labelOverlap=False, title=None)),
            tooltip=[
-               alt.Tooltip("이름"),
-               alt.Tooltip("미납금", title="")
+               alt.Tooltip("총액표시", title="")  # "총액:"은 값 안에 포함되어 있으므로 title은 공백 처리
            ]
        )
        .properties(width=700, height=len(domain_list) * 25)
