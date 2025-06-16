@@ -18,14 +18,22 @@ attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 # 지각 횟수 처리 (D열 = index 3)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 💰 금액 컬럼 클린업 함수
+# 💰 금액 컬럼 클린업 함수 (숫자 외 값도 처리)
 def clean_money(series):
     return (
-        series.astype(str)
-        .str.replace(r"[₩원,\s]", "", regex=True)  # ₩, 원, 쉼표, 공백 제거
-        .replace("", "0")  # 빈 문자열을 0으로 처리
-        .astype(int)
+        pd.to_numeric(
+            series.astype(str)
+            .str.replace(r"[₩원,\s]", "", regex=True)
+            .replace("", "0"),
+            errors="coerce"  # 숫자로 변환 안 되면 NaN
+        ).fillna(0).astype(int)  # NaN을 0으로
     )
+
+# 정제된 금액 데이터
+paid = clean_money(df["지불비용"])
+unpaid = clean_money(df["남은금액"])
+total = clean_money(df["총액"])
+
 
 # 금액 컬럼 정제
 paid = clean_money(df["지불비용"])
