@@ -18,10 +18,19 @@ attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 # 지각 횟수 처리 (D열 = index 3)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 지불/남은 금액도 정리
-paid = df["지불비용"].fillna(0).astype(int)
-unpaid = df["남은금액"].fillna(0).astype(int)
-total = df["총액"].fillna(0).astype(int)
+# 💰 금액 컬럼 클린업 함수
+def clean_money(series):
+    return (
+        series.astype(str)
+        .str.replace(r"[₩원,\s]", "", regex=True)  # ₩, 원, 쉼표, 공백 제거
+        .replace("", "0")  # 빈 문자열을 0으로 처리
+        .astype(int)
+    )
+
+# 금액 컬럼 정제
+paid = clean_money(df["지불비용"])
+unpaid = clean_money(df["남은금액"])
+total = clean_money(df["총액"])
 
 # 시각화용 데이터프레임 생성 (합계 행 제외)
 plot_df = pd.DataFrame({
@@ -36,7 +45,7 @@ plot_df = pd.DataFrame({
 # 미납 여부 컬럼 추가 (True = 아직 안 낸 금액 있음)
 plot_df["미납"] = plot_df["남은금액"] > 0
 
-# 출석번호 정렬을 위한 리스트
+# 출석번호 정렬 기준 리스트
 domain_list = plot_df["출석번호"].tolist()
 
 # Altair 색상 맵 정의 (납부완료: 파랑 / 미납: 빨강)
@@ -45,7 +54,7 @@ color_scale = alt.Scale(
     range=["#4B9CD3", "#FF6B6B"]
 )
 
-# Altair 그래프
+# Altair 그래프 생성
 chart = (
     alt.Chart(plot_df)
     .mark_bar()
@@ -59,7 +68,7 @@ chart = (
     .properties(width=700, height=len(domain_list) * 25)
 )
 
-# 출력
+# 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
 # 지각비 총액 출력 (CSV의 마지막 행 기준 남은금액)
