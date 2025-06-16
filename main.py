@@ -15,17 +15,17 @@ df = pd.read_csv(csv_path, encoding="utf-8-sig")
 # 출석번호 처리 (.0 제거)
 attendance = df["번호"].astype(str).str.replace(r"\.0$", "", regex=True)
 
-# 지각 횟수 처리 (D열: index 3)
+# 지각 횟수 처리 (D열)
 lateness = df.iloc[:, 3].fillna(0).astype(int)
 
-# 미납금(G열) 정제: ₩ 제거하고 다시 포맷
+# 미납금(G열) 정제 함수
 def clean_currency(val):
     try:
         return int(str(val).replace("₩", "").replace(",", "").strip())
     except:
         return 0
 
-# 시각화용 데이터 정리 (이름 + 총액 + 미납금 텍스트 포함)
+# 시각화용 데이터 정리
 plot_df = pd.DataFrame({
     "출석번호": attendance,
     "이름": df["이름"],
@@ -34,13 +34,13 @@ plot_df = pd.DataFrame({
     "미납금값": df["남은금액"].apply(clean_currency)
 }).iloc[:32]  # 마지막 합계행 제외
 
-# 지각 횟수 > 0만 포함
+# 지각 횟수 0 이상만 필터링
 plot_df = plot_df[plot_df["지각 횟수"] > 0]
 
-# 미납금 텍스트 포맷팅
+# "미납금: ₩xxx" 형식 문자열 생성
 plot_df["미납금"] = plot_df["미납금값"].apply(lambda x: f"미납금: ₩{x:,}")
 
-# 정렬
+# 지각 횟수 기준 정렬
 plot_df = plot_df.sort_values("지각 횟수", ascending=False)
 domain_list = plot_df["출석번호"].tolist()
 
@@ -52,7 +52,10 @@ chart = (
            x=alt.X("지각 횟수:Q", title="지각 횟수", axis=alt.Axis(format="d", tickMinStep=1)),
            y=alt.Y("출석번호:O", title="출석번호", scale=alt.Scale(domain=domain_list),
                    axis=alt.Axis(labelOverlap=False)),
-           tooltip=["이름", "미납금"]
+           tooltip=[
+               alt.Tooltip("이름"),
+               alt.Tooltip("미납금", title="")  # 라벨 없이 값만 출력
+           ]
        )
        .properties(width=700, height=len(domain_list) * 25)
 )
@@ -60,7 +63,7 @@ chart = (
 # 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
-# 지각비 총액 출력 (엑셀 기준 H34 = '남은금액' 열의 33번째 행)
+# 지각비 총액 출력 (엑셀 H34 = 33번째 행, '남은금액' 열)
 try:
     raw_value = df.at[32, "남은금액"]
     cleaned_value = str(raw_value).replace("₩", "").replace(",", "").strip()
