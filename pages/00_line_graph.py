@@ -27,43 +27,51 @@ plot_df = plot_df[plot_df["총액값"] > 0]  # 총액 0 이상 필터링
 top10 = plot_df.nlargest(10, "총액값")
 others = plot_df[~plot_df["이름"].isin(top10["이름"])]
 
-# "기타" 그룹 생성
+# 기타 그룹 추가
 others_sum = pd.DataFrame([{
     "이름": "기타",
     "총액값": others["총액값"].sum()
 }])
 
-# 상위 10명 + 기타 합치기
+# 최종 데이터프레임
 final_df = pd.concat([top10, others_sum], ignore_index=True)
+final_df["비율"] = final_df["총액값"] / final_df["총액값"].sum()
 
-# 총합 계산 → 퍼센트 표시용
-total = final_df["총액값"].sum()
-final_df["비율"] = final_df["총액값"] / total
+# 누적 비율로 각 조각의 중심각 계산
+final_df["누적"] = final_df["비율"].cumsum()
+final_df["시작"] = final_df["누적"] - final_df["비율"]
+final_df["각도"] = (final_df["시작"] + final_df["비율"] / 2) * 2 * 3.14159  # 라디안
+final_df["x"] = final_df["각도"].apply(lambda a: 200 * np.cos(a))
+final_df["y"] = final_df["각도"].apply(lambda a: 200 * np.sin(a))
 
 # 파이 차트
 pie = (
     alt.Chart(final_df)
     .mark_arc()
     .encode(
-        theta=alt.Theta("총액값:Q", title=""),
-        color=alt.Color("이름:N", title="이름"),
-        tooltip=["이름", alt.Tooltip("총액값:Q", format=",")]
+        theta=alt.Theta("총액값:Q"),
+        color=alt.Color("이름:N", title="이름", scale=alt.Scale(scheme='category20')),
+        tooltip=[
+            alt.Tooltip("이름:N"),
+            alt.Tooltip("총액값:Q", format=",")
+        ]
     )
     .properties(width=500, height=500)
 )
 
-# 텍스트 레이블 (이름)
+# 이름 텍스트
 labels = (
     alt.Chart(final_df)
-    .mark_text(radius=170, size=13)
+    .mark_text(size=13)
     .encode(
-        theta=alt.Theta("총액값:Q"),
+        x=alt.X("x:Q", axis=None),
+        y=alt.Y("y:Q", axis=None),
         text=alt.Text("이름:N"),
-        color=alt.value("black")  # 텍스트 색상
+        color=alt.value("black")
     )
 )
 
-# 차트 + 레이블 결합
+# 차트 결합
 chart = pie + labels
 
 # 출력
