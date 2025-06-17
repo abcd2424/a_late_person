@@ -24,7 +24,7 @@ plot_df = df.loc[:31, ["이름", "총액값"]].copy()  # 마지막 합계행 제
 plot_df = plot_df[plot_df["총액값"] > 0]  # 총액 0 이상 필터링
 
 # 상위 10명 추출
-top10 = plot_df.nlargest(11, "총액값")
+top10 = plot_df.nlargest(10, "총액값")
 others = plot_df[~plot_df["이름"].isin(top10["이름"])]
 
 # "기타" 그룹 생성
