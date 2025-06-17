@@ -28,15 +28,15 @@ others_sum = pd.DataFrame([{
 final_df = pd.concat([top10, others_sum], ignore_index=True)
 final_df = final_df.sort_values("지각 횟수", ascending=False).reset_index(drop=True)
 
-# Vega-Lite 차트 베이스
+# Vega-Lite 차트 베이스 (order 채널 추가)
 base = alt.Chart(final_df).encode(
-    theta=alt.Theta("지각 횟수:Q", stack=True),               # 파이 각도 기준
-    color=alt.Color(                                         
+    theta=alt.Theta("지각 횟수:Q", stack=True),
+    color=alt.Color(
         "이름:N",
-        sort=final_df["이름"].tolist(),                     # 범례 및 그리기 순서 고정
         scale=alt.Scale(scheme="category20b"),
         title="이름"
-    )
+    ),
+    order=alt.Order("지각 횟수:Q", sort="descending")  # ← 여기가 핵심
 )
 
 # 파이 차트
@@ -47,8 +47,12 @@ pie = base.mark_arc(innerRadius=0, outerRadius=180).encode(
     ]
 )
 
-# 조각 중앙에 이름 라벨
-labels = base.mark_text(radius=110, size=13, fontWeight="bold").encode(
+# 파이 중앙에 이름 라벨
+labels = base.mark_text(
+    radius=110,       # 원 중심에서 라벨 거리
+    size=13,
+    fontWeight="bold"
+).encode(
     text=alt.Text("이름:N"),
     color=alt.value("white")
 )
