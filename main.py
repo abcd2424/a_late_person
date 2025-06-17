@@ -99,3 +99,13 @@ try:
     st.markdown(f"### 미납금 총액: {total_balance:,}원")
 except Exception as e:
     st.error(f"❌ 미납금 총액을 불러올 수 없습니다.\n오류: {e}")
+
+# 하단 '문의하기' 문구 및 링크
+st.markdown(
+    """
+    <div style='text-align: center; margin-top: 30px; font-size: 13px; color: gray;'>
+        문의하기: <a href="https://instagram.com/kimdongze_0417" target="_blank" style="color: gray; text-decoration: underline;">클릭</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
