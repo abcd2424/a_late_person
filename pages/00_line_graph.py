@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-st.title("총 지각비 원 그래프 (상위 5명 + 기타)")
+st.title("총 지각비 원 그래프 (상위 10명 + 기타)")
 
 # CSV 경로
 csv_path = os.path.join(os.path.dirname(__file__), "../data.csv")
@@ -23,9 +23,9 @@ df["총액값"] = df["총액"].apply(clean_currency)
 plot_df = df.loc[:31, ["이름", "총액값"]].copy()  # 마지막 합계행 제외
 plot_df = plot_df[plot_df["총액값"] > 0]  # 총액 0 이상 필터링
 
-# 상위 5명 추출
-top5 = plot_df.nlargest(5, "총액값")
-others = plot_df[~plot_df["이름"].isin(top5["이름"])]
+# 상위 10명 추출
+top5 = plot_df.nlargest(10, "총액값")
+others = plot_df[~plot_df["이름"].isin(top10["이름"])]
 
 # "기타" 그룹 생성
 others_sum = pd.DataFrame([{
@@ -33,8 +33,8 @@ others_sum = pd.DataFrame([{
     "총액값": others["총액값"].sum()
 }])
 
-# 상위 5명 + 기타 합치기
-final_df = pd.concat([top5, others_sum], ignore_index=True)
+# 상위 10명 + 기타 합치기
+final_df = pd.concat([top10, others_sum], ignore_index=True)
 
 # 파이 차트 생성
 pie = (
