@@ -36,7 +36,11 @@ others_sum = pd.DataFrame([{
 # 상위 10명 + 기타 합치기
 final_df = pd.concat([top10, others_sum], ignore_index=True)
 
-# 파이 차트 생성
+# 총합 계산 → 퍼센트 표시용
+total = final_df["총액값"].sum()
+final_df["비율"] = final_df["총액값"] / total
+
+# 파이 차트
 pie = (
     alt.Chart(final_df)
     .mark_arc()
@@ -48,5 +52,19 @@ pie = (
     .properties(width=500, height=500)
 )
 
-# 차트 출력
-st.altair_chart(pie, use_container_width=True)
+# 텍스트 레이블 (이름)
+labels = (
+    alt.Chart(final_df)
+    .mark_text(radius=170, size=13)
+    .encode(
+        theta=alt.Theta("총액값:Q"),
+        text=alt.Text("이름:N"),
+        color=alt.value("black")  # 텍스트 색상
+    )
+)
+
+# 차트 + 레이블 결합
+chart = pie + labels
+
+# 출력
+st.altair_chart(chart, use_container_width=True)
