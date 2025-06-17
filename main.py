@@ -86,26 +86,24 @@ chart = (
 # 그래프 출력
 st.altair_chart(chart, use_container_width=True)
 
-# 지각비 총액 계산 (합계 행 의존 X)
+# 지각비 총액 출력
 try:
     total_fee = plot_df["총액값"].sum()
     st.markdown(f"### 지각비 총액: {total_fee:,}원")
 except Exception as e:
     st.error(f"❌ 지각비 총액을 불러올 수 없습니다.\n오류: {e}")
 
-# 미납금 총액 계산 (합계 행 의존 X)
+# 미납금 총액 출력
 try:
     total_balance = plot_df["미납금값"].sum()
     st.markdown(f"### 미납금 총액: {total_balance:,}원")
 except Exception as e:
     st.error(f"❌ 미납금 총액을 불러올 수 없습니다.\n오류: {e}")
 
-# 하단 '문의하기' 문구 및 링크
+# 하단 문의하기 문구 추가 (흰색 글씨, 가운데 정렬, 인스타그램 링크)
 st.markdown(
-    """
-    <div style='text-align: center; margin-top: 30px; font-size: 13px; color: gray;'>
-        문의하기: <a href="https://instagram.com/kimdongze_0417" target="_blank" style="color: gray; text-decoration: underline;">클릭</a>
-    </div>
-    """,
+    '<p style="text-align:center; color:white; font-size:16px;">'
+    '<a href="https://instagram.com/kimdongze_0417" target="_blank" style="color:white; text-decoration:none;">문의하기</a>'
+    '</p>',
     unsafe_allow_html=True
 )
