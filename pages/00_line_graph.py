@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-st.title("총 지각비 원 그래프")
+st.title("총 지각비 원 그래프 (상위 5명 + 기타)")
 
 # CSV 경로
 csv_path = os.path.join(os.path.dirname(__file__), "../data.csv")
@@ -18,23 +18,35 @@ def clean_currency(val):
     except:
         return 0
 
-# 총액 숫자화 + 마지막 행(합계) 제외
+# 총액 숫자화
 df["총액값"] = df["총액"].apply(clean_currency)
-plot_df = df.loc[:31, ["이름", "총액값"]].copy()
+plot_df = df.loc[:31, ["이름", "총액값"]].copy()  # 마지막 합계행 제외
+plot_df = plot_df[plot_df["총액값"] > 0]  # 총액 0 이상 필터링
 
-# 총액이 0 이상인 사람만 필터링 (지각 안 한 사람 제외)
-plot_df = plot_df[plot_df["총액값"] > 0]
+# 상위 5명 추출
+top5 = plot_df.nlargest(5, "총액값")
+others = plot_df[~plot_df["이름"].isin(top5["이름"])]
+
+# "기타" 그룹 생성
+others_sum = pd.DataFrame([{
+    "이름": "기타",
+    "총액값": others["총액값"].sum()
+}])
+
+# 상위 5명 + 기타 합치기
+final_df = pd.concat([top5, others_sum], ignore_index=True)
 
 # 파이 차트 생성
 pie = (
-    alt.Chart(plot_df)
+    alt.Chart(final_df)
     .mark_arc()
     .encode(
-        theta=alt.Theta("총액값:Q", title="총액 비율"),
-        color=alt.Color("이름:N", legend=None),
+        theta=alt.Theta("총액값:Q", title=""),
+        color=alt.Color("이름:N", title="이름"),
         tooltip=["이름", alt.Tooltip("총액값:Q", format=",")]
     )
     .properties(width=500, height=500)
 )
 
+# 차트 출력
 st.altair_chart(pie, use_container_width=True)
